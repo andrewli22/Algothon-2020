@@ -2,7 +2,7 @@ from model import create_model
 from model import test_predictions
 import pandas as pd
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 model = create_model("SPY.csv")
 predictions, etf_prices = test_predictions(model,"SPY-5-years.csv")
