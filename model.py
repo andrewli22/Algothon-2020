@@ -1,13 +1,11 @@
 
-from sklearn.preprocessing import scale
+
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn import preprocessing
+from sklearn.preprocessing import scale
 import tensorflow as tf
-from sklearn.metrics import r2_score
-import seaborn as sns
 import statsmodels.api as sm
 import keras.losses
 from keras.models import Sequential
@@ -17,10 +15,10 @@ def create_model(data):
     
     df = pd.read_csv(data)
 
-    df['5d_future_close'] = df['Last'].shift(-5)
-    df['5d_close_future_pct'] = df['5d_future_close'].pct_change(5)
-    df['5d_close_pct'] = df['Last'].pct_change(5)
-    df['5d_vol_pct'] = df['Volume'].pct_change(5)
+    df['5d_future_close'] = df['Last'].shift(-1)
+    df['5d_close_future_pct'] = df['5d_future_close'].pct_change()
+    df['5d_close_pct'] = df['Last'].pct_change()
+    df['5d_vol_pct'] = df['Volume'].pct_change()
 
     # generate evenly spaced grid for x values 0-10
     x = np.linspace(0, 10)
@@ -34,7 +32,7 @@ def create_model(data):
     # Create SMA moving averages and rsi for timeperiods of 14, 30, and 50
     for n in [14, 30, 50]:
 
-     # Create the SMA indicator and divide by 'Last'
+     # Create the SMA indicator for each value in last
       df['ma' + str(n)] = df['Last'].rolling(n).mean().pct_change()
       feature_names += ['ma' + str(n)]
  
@@ -44,67 +42,47 @@ def create_model(data):
     features = df[feature_names]
     targets = df['5d_close_future_pct']
 
-    # Create DataFrame from target column and feature columns
-    feat_targ_df = df[['5d_close_future_pct'] + feature_names]
 
     linear_features = sm.add_constant(features)
     train_size = int(0.8 * features.shape[0])
     train_features = linear_features[:train_size]
     train_targets = targets[:train_size]
-    test_features = linear_features[train_size:]
-    test_targets = targets[train_size:]
+
 
     # Create the linear model and complete the least squares fit
     model = sm.OLS(train_targets, train_features)
-    results = model.fit()  # fit the model
 
-    # Make predictions from our model for train and test sets
-    train_predictions = results.predict(train_features)
-#   test_predictions = results.predict(test_features)
-
-    # Standardize the train and test features
+    # Standardize the train features
     scaled_train_features = scale(train_features)
-    scaled_test_features = scale(test_features)
 
+    # Create the model
     epochs = [200]
     layers = [[25,30,1]]
 
-    # Create the model
     def model_func(layer):
-        model_1 = Sequential()
-        model_1.add(Dense(layer[0], 
+        model = Sequential()
+        model.add(Dense(layer[0], 
             input_dim=scaled_train_features.shape[1], activation='relu'))
-        model_1.add(Dense(layer[1], activation='relu'))
-        model_1.add(Dense(layer[2], activation='linear'))
-        return model_1
-
-    # Fit the model
-    model = 1
-    max = -100000
+        model.add(Dense(layer[1], activation='relu'))
+        model.add(Dense(layer[2], activation='linear'))
+        return model
 
     for epoch in epochs:
         for layer in layers:
-            model_1 = model_func(layer)
-            model_1.compile(optimizer='adam', loss='mse')
-            history = model_1.fit(scaled_train_features, train_targets, epochs=epoch)
-            train_preds = model_1.predict(scaled_train_features)
-            if(max < r2_score(train_targets, train_preds)):
-                max = r2_score(train_targets, train_preds)
+            model = model_func(layer)
+            model.compile(optimizer='adam', loss='mse')
+            history = model.fit(scaled_train_features, train_targets, epochs=epoch)
+            train_preds = model.predict(scaled_train_features)
 
-
-# Use the last loss as the title
-
-
-
-    return model_1
+    return model
 
 def test_predictions(model,data):
 
     df = pd.read_csv(data)
 
 
-    df['5d_close_pct'] = df['Last'].pct_change(5)
-    df['5d_vol_pct'] = df['Volume'].pct_change(5)
+    df['5d_close_pct'] = df['Last'].pct_change()
+    df['5d_vol_pct'] = df['Volume'].pct_change()
 
     # a list of the feature names for later
     feature_names = ['5d_close_pct']  
