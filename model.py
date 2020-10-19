@@ -15,10 +15,10 @@ def create_model(data):
     
     df = pd.read_csv(data)
 
-    df['5d_future_close'] = df['Last'].shift(-1)
-    df['5d_close_future_pct'] = df['5d_future_close'].pct_change()
-    df['5d_close_pct'] = df['Last'].pct_change()
-    df['5d_vol_pct'] = df['Volume'].pct_change()
+    df['daily_future_close'] = df['Last'].shift(-1)
+    df['daily_close_future_pct'] = df['daily_future_close'].pct_change()
+    df['daily_close_pct'] = df['Last'].pct_change()
+    df['daily_vol_pct'] = df['Volume'].pct_change()
 
     # generate evenly spaced grid for x values 0-10
     x = np.linspace(0, 10)
@@ -27,7 +27,7 @@ def create_model(data):
     y = x + np.random.standard_normal(len(x))
 
     # a list of the feature names for later
-    feature_names = ['5d_close_pct']  
+    feature_names = ['daily_close_pct']  
 
     # Create SMA moving averages and rsi for timeperiods of 14, 30, and 50
     for n in [14, 30, 50]:
@@ -38,9 +38,9 @@ def create_model(data):
  
     # Drop all na values
     df = df.dropna()
-    feature_names += ['5d_vol_pct']
+    feature_names += ['daily_vol_pct']
     features = df[feature_names]
-    targets = df['5d_close_future_pct']
+    targets = df['daily_close_future_pct']
 
 
     linear_features = sm.add_constant(features)
@@ -81,11 +81,11 @@ def test_predictions(model,data):
     df = pd.read_csv(data)
 
 
-    df['5d_close_pct'] = df['Last'].pct_change()
-    df['5d_vol_pct'] = df['Volume'].pct_change()
+    df['daily_close_pct'] = df['Last'].pct_change()
+    df['daily_vol_pct'] = df['Volume'].pct_change()
 
     # a list of the feature names for later
-    feature_names = ['5d_close_pct']  
+    feature_names = ['daily_close_pct']  
 
     # Create SMA moving averages and rsi for timeperiods of 14, 30, and 50
     for n in [14, 30, 50]:
@@ -94,7 +94,7 @@ def test_predictions(model,data):
       df['ma' + str(n)] = df['Last'].rolling(n).mean().pct_change()
       feature_names += ['ma' + str(n)]
 
-    feature_names += ['5d_vol_pct']
+    feature_names += ['daily_vol_pct']
     # Drop all na values
     df = df.dropna()
     features = df[feature_names]
