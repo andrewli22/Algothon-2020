@@ -89,13 +89,10 @@ def test_predictions(model,data):
 
     # Create SMA moving averages and rsi for timeperiods of 14, 30, and 50
     for n in [14, 30, 50]:
-
-     # Create the SMA indicator and divide by 'Last'
       df['ma' + str(n)] = df['Last'].rolling(n).mean().pct_change()
       feature_names += ['ma' + str(n)]
 
     feature_names += ['daily_vol_pct']
-    # Drop all na values
     df = df.dropna()
     features = df[feature_names]
     test_features = sm.add_constant(features)
