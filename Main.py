@@ -10,21 +10,28 @@ predictions, etf_prices = test_predictions(model,"SPY.csv")
 p_list = predictions.tolist()
 balance = 1000000
 stock_count = 0
+
 etf_price_list = etf_prices.tolist()
 pl = []
 days = []
 
 for i in range(0,len(p_list)):
     prediction = p_list[i][0] 
-    if (prediction < 0.005):
+    if (prediction < 0.001):
         balance += stock_count*etf_price_list[i]
         stock_count = 0
+    elif (prediction < 0.005 and prediction > 0.001):
+        if ( balance - etf_price_list[i]*100 > 0):
+            stock_count += 20
+            balance -= etf_price_list[i]*20
     elif (prediction < 0.01 and prediction > 0.005):
-        stock_count += 25
-        balance -= etf_price_list[i]*25
+        if ( balance - etf_price_list[i]*100 > 0):
+            stock_count += 100
+            balance -= etf_price_list[i]*100
     elif (prediction > 0.01):
-        stock_count += 50
-        balance -= etf_price_list[i]*50
+        if ( balance - etf_price_list[i]*300 > 0):
+            stock_count += 300
+            balance -= etf_price_list[i]*300
     pl.append(((balance+etf_price_list[i]*stock_count)-1000000))
     days.append(i)
 
