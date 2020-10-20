@@ -10,6 +10,7 @@ import statsmodels.api as sm
 import keras.losses
 from keras.models import Sequential
 from keras.layers import Dense
+import matplotlib.pyplot as plt
 
 def create_model(data):
     
@@ -38,9 +39,8 @@ def create_model(data):
 
 
     linear_features = sm.add_constant(features)
-    train_size = int(0.8 * features.shape[0])
-    train_features = linear_features[:train_size]
-    train_targets = targets[:train_size]
+    train_features = linear_features
+    train_targets = targets
 
 
     # Create the linear model and complete the least squares fit
@@ -50,13 +50,12 @@ def create_model(data):
     scaled_train_features = scale(train_features)
 
     # Create the model
-    epochs = [500000]
-    layers = [[25,30,30,1]]
+    epochs = [1000]
+    layers = [[25,30,1]]
 
     def model_func(layer):
         model = Sequential()
-        model.add(Dense(layer[0], 
-        input_dim=scaled_train_features.shape[1], activation='relu'))
+        model.add(Dense(layer[0], input_dim=scaled_train_features.shape[1], activation='relu'))
         model.add(Dense(layer[1], activation='relu'))
         model.add(Dense(layer[2], activation='linear'))
         return model
@@ -65,8 +64,19 @@ def create_model(data):
         for layer in layers:
             model = model_func(layer)
             model.compile(optimizer='adam', loss='mse')
-#           history = model.fit(scaled_train_features, train_targets, epochs=epoch)
-#            train_preds = model.predict(scaled_train_features)
+#            history = model.fit(scaled_train_features, train_targets, epochs=epoch)
+
+    #plot loss function
+#     plt.plot(history.history['loss'])
+#     plt.title('Loss Function: ' + str(round(history.history['loss'][-1], 6)))
+#     plt.show()
+    train_preds = model.predict(scaled_train_features)
+
+    #Plot predictions vs actual
+    plt.scatter(train_preds, train_targets)
+    plt.xlabel('Predictions')
+    plt.ylabel('Actual')
+    plt.show()
 
     return model
 
