@@ -20,12 +20,6 @@ def create_model(data):
     df['daily_close_pct'] = df['Last'].pct_change()
     df['daily_vol_pct'] = df['Volume'].pct_change()
 
-    # generate evenly spaced grid for x values 0-10
-    x = np.linspace(0, 10)
-
-    # generate randomized data for y values
-    y = x + np.random.standard_normal(len(x))
-
     # a list of the feature names for later
     feature_names = ['daily_close_pct']  
 
@@ -56,13 +50,13 @@ def create_model(data):
     scaled_train_features = scale(train_features)
 
     # Create the model
-    epochs = [200]
-    layers = [[25,30,1]]
+    epochs = [500000]
+    layers = [[25,30,30,1]]
 
     def model_func(layer):
         model = Sequential()
         model.add(Dense(layer[0], 
-            input_dim=scaled_train_features.shape[1], activation='relu'))
+        input_dim=scaled_train_features.shape[1], activation='relu'))
         model.add(Dense(layer[1], activation='relu'))
         model.add(Dense(layer[2], activation='linear'))
         return model
@@ -71,8 +65,8 @@ def create_model(data):
         for layer in layers:
             model = model_func(layer)
             model.compile(optimizer='adam', loss='mse')
-            history = model.fit(scaled_train_features, train_targets, epochs=epoch)
-            train_preds = model.predict(scaled_train_features)
+#           history = model.fit(scaled_train_features, train_targets, epochs=epoch)
+#            train_preds = model.predict(scaled_train_features)
 
     return model
 
