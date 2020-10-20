@@ -21,17 +21,13 @@ def create_model(data):
     df['daily_close_pct'] = df['Last'].pct_change()
     df['daily_vol_pct'] = df['Volume'].pct_change()
 
-    # a list of the feature names for later
     feature_names = ['daily_close_pct']  
 
     # Create SMA moving averages and rsi for timeperiods of 14, 30, and 50
     for n in [14, 30, 50]:
-
-     # Create the SMA indicator for each value in last
       df['ma' + str(n)] = df['Last'].rolling(n).mean().pct_change()
       feature_names += ['ma' + str(n)]
  
-    # Drop all na values
     df = df.dropna()
     feature_names += ['daily_vol_pct']
     features = df[feature_names]
@@ -50,7 +46,7 @@ def create_model(data):
     scaled_train_features = scale(train_features)
 
     # Create the model
-    epochs = [1000]
+    epochs = [100]
     layers = [[25,30,1]]
 
     def model_func(layer):
@@ -66,17 +62,17 @@ def create_model(data):
             model.compile(optimizer='adam', loss='mse')
 #            history = model.fit(scaled_train_features, train_targets, epochs=epoch)
 
-    #plot loss function
-#     plt.plot(history.history['loss'])
-#     plt.title('Loss Function: ' + str(round(history.history['loss'][-1], 6)))
-#     plt.show()
-    train_preds = model.predict(scaled_train_features)
+#    plot loss function
+#    plt.plot(history.history['loss'])
+#    plt.title('Loss Function: ' + str(round(history.history['loss'][-1], 6)))
+#    plt.show()
+#    train_preds = model.predict(scaled_train_features)
 
     #Plot predictions vs actual
-    plt.scatter(train_preds, train_targets)
-    plt.xlabel('Predictions')
-    plt.ylabel('Actual')
-    plt.show()
+#    plt.scatter(train_preds, train_targets)
+#    plt.xlabel('Predictions')
+#    plt.ylabel('Actual')
+#    plt.show()
 
     return model
 
